@@ -1,0 +1,11 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Hermes' upstream Dockerfile already runs tini -> entrypoint.sh, which forwards
+# CMD args to the `hermes` CLI. So this becomes `hermes gateway run` at runtime.
+startCommand = "gateway run"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+# No healthcheckPath — Hermes does not expose an HTTP health endpoint.
