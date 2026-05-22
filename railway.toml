@@ -3,11 +3,12 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Railway's startCommand bypasses the image ENTRYPOINT, so we must invoke the
-# venv-activating bootstrap script ourselves. exec replaces the sh process so
-# hermes (the gateway) is PID 1's child directly, not under an extra shell.
-startCommand = "/opt/hermes/docker/entrypoint.sh gateway run"
+# Seed our SOUL/CONTEXT/skills into the persistent volume before handing off
+# to the image's venv-activating bootstrap. Runs as root (UID 0) at start;
+# entrypoint.sh drops to user `hermes` via gosu downstream.
+# - SOUL.md and CONTEXT.md: always overwritten (we own them).
+# - Custom skills: seeded only if absent (preserve Hermes' learned edits).
+startCommand = "sh -c 'set -e; mkdir -p /opt/data/skills; cp -f /seed/SOUL.md /opt/data/SOUL.md; cp -f /seed/CONTEXT.md /opt/data/CONTEXT.md; for f in /seed/skills/*.skill.md; do n=$(basename \"$f\"); [ -f \"/opt/data/skills/$n\" ] || cp \"$f\" \"/opt/data/skills/$n\"; done; chown -R hermes:hermes /opt/data/SOUL.md /opt/data/CONTEXT.md /opt/data/skills; /opt/hermes/docker/entrypoint.sh gateway run'"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 # No healthcheckPath — Hermes does not expose an HTTP health endpoint by default.
-# (Could enable hermes dashboard later for one, but it exposes API keys.)
