@@ -3,9 +3,9 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Hermes' upstream Dockerfile already runs tini -> entrypoint.sh, which forwards
-# CMD args to the `hermes` CLI. So this becomes `hermes gateway run` at runtime.
-startCommand = "gateway run"
+# PHASE 0 DIAGNOSTIC: wrap the start to capture stderr and keep the container
+# alive long enough for Railway to scrape logs. Revert once we know the cause.
+startCommand = "sh -c 'echo --- HERMES BOOT START ---; hermes --version 2>&1 || true; echo --- ENV (filtered) ---; env | grep -E \"^(HERMES_|OPENROUTER_|SLACK_|RAILWAY_)\" | sed \"s/=.*KEY=.*$/=<redacted>/\"; echo --- gateway run ---; hermes gateway run 2>&1; echo EXIT=$?; echo --- holding 300s for log scrape ---; sleep 300'"
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 5
+restartPolicyMaxRetries = 1
 # No healthcheckPath — Hermes does not expose an HTTP health endpoint.
