@@ -3,11 +3,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Railway wraps startCommand in `sh -c "..."`. The image entrypoint's dual-mode
-# logic sees `sh` as a PATH binary and exec's it, so we must spell out `hermes`
-# rather than relying on the entrypoint's `exec hermes "$@"` wrap-with-hermes
-# fallback (that only fires when args[0] is NOT on PATH).
-startCommand = "hermes gateway run"
+# DIAGNOSTIC: prove the entrypoint chain still works, capture args & exit.
+startCommand = "sh -c 'echo HELLO_FROM_WRAPPER; echo ARGS_SEEN: $0 $@; /opt/hermes/docker/entrypoint.sh gateway run; echo ENTRYPOINT_EXIT=$?; sleep 120'"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 # No healthcheckPath — Hermes does not expose an HTTP health endpoint by default.
