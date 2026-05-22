@@ -3,9 +3,11 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# PHASE 0 DIAGNOSTIC: wrap the start to capture stderr and keep the container
-# alive long enough for Railway to scrape logs. Revert once we know the cause.
-startCommand = "sh -c 'set +e; echo === ENTRYPOINT SCRIPT ===; cat /opt/hermes/docker/entrypoint.sh 2>&1; echo === DOCKER COMPOSE ===; cat /opt/hermes/docker-compose.yml 2>&1 | head -60; echo === HERMES VIA ENTRYPOINT ===; /opt/hermes/docker/entrypoint.sh gateway run 2>&1 & EP_PID=$!; sleep 30; echo === AFTER 30s ===; kill -0 $EP_PID 2>/dev/null && echo still_running || echo entrypoint_exited; ps auxf 2>&1 | head -20; echo === HOLDING 300s ===; sleep 300'"
+# Image entrypoint /opt/hermes/docker/entrypoint.sh wraps args with `hermes`,
+# activates its uv venv, drops to user `hermes`, and seeds $HERMES_HOME from
+# bundled examples on first boot. So this CMD becomes `hermes gateway run`.
+startCommand = "gateway run"
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 1
-# No healthcheckPath — Hermes does not expose an HTTP health endpoint.
+restartPolicyMaxRetries = 3
+# No healthcheckPath — Hermes does not expose an HTTP health endpoint by default.
+# (Could enable hermes dashboard later for one, but it exposes API keys.)
