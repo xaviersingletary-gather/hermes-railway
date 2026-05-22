@@ -6,7 +6,7 @@ dockerfilePath = "Dockerfile"
 # Railway's startCommand bypasses the image ENTRYPOINT, so we must invoke the
 # venv-activating bootstrap script ourselves. exec replaces the sh process so
 # hermes (the gateway) is PID 1's child directly, not under an extra shell.
-startCommand = "exec /opt/hermes/docker/entrypoint.sh gateway run"
+startCommand = "/opt/hermes/docker/entrypoint.sh gateway run"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 # No healthcheckPath — Hermes does not expose an HTTP health endpoint by default.
