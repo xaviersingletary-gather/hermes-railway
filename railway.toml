@@ -3,10 +3,11 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Image entrypoint /opt/hermes/docker/entrypoint.sh wraps args with `hermes`,
-# activates its uv venv, drops to user `hermes`, and seeds $HERMES_HOME from
-# bundled examples on first boot. So this CMD becomes `hermes gateway run`.
-startCommand = "gateway run"
+# Railway wraps startCommand in `sh -c "..."`. The image entrypoint's dual-mode
+# logic sees `sh` as a PATH binary and exec's it, so we must spell out `hermes`
+# rather than relying on the entrypoint's `exec hermes "$@"` wrap-with-hermes
+# fallback (that only fires when args[0] is NOT on PATH).
+startCommand = "hermes gateway run"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 # No healthcheckPath — Hermes does not expose an HTTP health endpoint by default.
