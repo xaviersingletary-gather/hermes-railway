@@ -5,7 +5,7 @@ dockerfilePath = "Dockerfile"
 [deploy]
 # PHASE 0 DIAGNOSTIC: wrap the start to capture stderr and keep the container
 # alive long enough for Railway to scrape logs. Revert once we know the cause.
-startCommand = "sh -c 'set +e; echo === HERMES BOOT ===; ls /opt/hermes 2>&1 | head -30; echo === SEARCH BINARY ===; find /opt /usr/local/bin /usr/bin -maxdepth 3 -name hermes -o -name hermes.py 2>/dev/null; echo === ENV ===; env | grep -E ^HERMES_; echo === DATA DIR ===; ls -la /opt/data 2>&1 || echo no_data_dir; echo === ENTRYPOINT FILE ===; cat /opt/hermes/entrypoint.sh 2>/dev/null || cat /entrypoint.sh 2>/dev/null || echo no_entrypoint_found; echo === RUN VIA PY MODULE ===; cd /opt/hermes 2>/dev/null && python -m hermes_cli gateway run; echo EXIT=$?; echo === HOLDING 300s ===; sleep 300'"
+startCommand = "sh -c 'set +e; echo === UPSTREAM DOCKERFILE ===; cat /opt/hermes/Dockerfile 2>&1 | head -80; echo === DOCKER DIR ===; ls /opt/hermes/docker 2>&1; echo === HERMES BINARY ===; file /opt/hermes/hermes 2>&1; head -3 /opt/hermes/hermes 2>&1; echo === HERMES VERSION ===; /opt/hermes/hermes --version 2>&1; echo VER_EXIT=$?; echo === GATEWAY RUN STDERR ===; /opt/hermes/hermes gateway run 2>&1; echo EXIT=$?; echo === HOLDING 300s ===; sleep 300'"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 1
 # No healthcheckPath — Hermes does not expose an HTTP health endpoint.
