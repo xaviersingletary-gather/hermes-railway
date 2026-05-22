@@ -5,7 +5,7 @@ dockerfilePath = "Dockerfile"
 [deploy]
 # PHASE 0 DIAGNOSTIC: wrap the start to capture stderr and keep the container
 # alive long enough for Railway to scrape logs. Revert once we know the cause.
-startCommand = "sh -c 'echo --- HERMES BOOT START ---; hermes --version 2>&1 || true; echo --- ENV (filtered) ---; env | grep -E \"^(HERMES_|OPENROUTER_|SLACK_|RAILWAY_)\" | sed \"s/=.*KEY=.*$/=<redacted>/\"; echo --- gateway run ---; hermes gateway run 2>&1; echo EXIT=$?; echo --- holding 300s for log scrape ---; sleep 300'"
+startCommand = "sh -c 'set +e; echo === HERMES BOOT ===; which hermes; hermes --version 2>&1; echo === ENV ===; env | grep -E ^HERMES_; env | grep -E ^OPENROUTER_MODEL=; echo === HOME LISTING ===; ls -la $HOME/.hermes 2>&1 || echo no_hermes_home; echo === GATEWAY RUN ===; hermes gateway run; echo EXIT=$?; echo === HOLDING 300s ===; sleep 300'"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 1
 # No healthcheckPath — Hermes does not expose an HTTP health endpoint.
